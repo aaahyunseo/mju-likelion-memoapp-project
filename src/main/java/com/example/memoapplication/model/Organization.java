@@ -17,7 +17,7 @@ import java.util.List;
 @Entity(name = "organization")
 public class Organization extends BaseEntity {
     @Setter
-    @Column(length = 50, nullable = false)// 길이는 20자 이하이고, 비어있을 수 없다.
+    @Column(length = 50, nullable = false)// 길이는 50자 이하이고, 비어있을 수 없다.
     private String name;
 
     @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

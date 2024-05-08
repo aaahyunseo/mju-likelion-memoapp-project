@@ -2,7 +2,6 @@ package com.example.memoapplication.repository;
 
 import com.example.memoapplication.errorcode.ErrorCode;
 import com.example.memoapplication.exception.UserNotFoundException;
-import com.example.memoapplication.model.Organization;
 import com.example.memoapplication.model.OrganizationUser;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -16,14 +15,11 @@ public class OrganizationRepository {
     private final OrganizationUserJpaRepository organizationUserJpaRepository;
 
     //organization 가입
-    public void joinOrganization(Organization organization, UUID userId) {
+    public void joinOrganization(OrganizationUser organizationUser, UUID userId) {
         if (userJpaRepository.existsById(userId)) {
             //유저 ID 존재
-            OrganizationUser organizationUser = OrganizationUser.builder()
-                    .user(userJpaRepository.findUserById(userId))
-                    .organization(organization)
-                    .build();
             organizationUserJpaRepository.save(organizationUser);
+            return;
         }
         throw new UserNotFoundException(ErrorCode.USER_NOT_FOUND);
     }

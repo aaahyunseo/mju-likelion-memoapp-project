@@ -9,9 +9,9 @@ import java.util.UUID;
 
 @Repository
 public interface MemoJpaRepository extends JpaRepository<Memo, UUID> {
-    List<Memo> findMemosByUserId(UUID userId);
-
-    Memo findMemoById(UUID id);
+    List<Memo> findAllByUserId(UUID userId);
 
     boolean existsByUserId(UUID userId);
+
+    Memo findMemoById(UUID id);
 }

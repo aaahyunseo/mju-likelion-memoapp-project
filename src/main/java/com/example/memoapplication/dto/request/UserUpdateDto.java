@@ -1,4 +1,4 @@
-package com.example.memoapplication.dto;
+package com.example.memoapplication.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;

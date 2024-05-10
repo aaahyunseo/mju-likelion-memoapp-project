@@ -7,5 +7,5 @@ import lombok.Getter;
 @Builder
 @Getter
 public class MemoResponseData {
-    private Memo memo;
+    private final Memo memo;
 }

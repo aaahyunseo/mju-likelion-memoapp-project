@@ -1,8 +1,8 @@
 package com.example.memoapplication.controller;
 
-import com.example.memoapplication.dto.UserCreateDto;
-import com.example.memoapplication.dto.UserLoginDto;
-import com.example.memoapplication.dto.UserUpdateDto;
+import com.example.memoapplication.dto.request.UserCreateDto;
+import com.example.memoapplication.dto.request.UserLoginDto;
+import com.example.memoapplication.dto.request.UserUpdateDto;
 import com.example.memoapplication.dto.response.ResponseDto;
 import com.example.memoapplication.service.UserService;
 import jakarta.validation.Valid;
@@ -23,21 +23,21 @@ public class UserController {
     @PostMapping
     public ResponseEntity<ResponseDto<Void>> joinUser(@RequestBody @Valid UserCreateDto userCreateDto) {
         userService.createUser(userCreateDto);
-        return new ResponseEntity<>(ResponseDto.res(HttpStatus.CREATED, "signUp"), HttpStatus.CREATED);
+        return new ResponseEntity<>(ResponseDto.res(HttpStatus.CREATED, "sign Up"), HttpStatus.CREATED);
     }
 
     //회원탈퇴
     @DeleteMapping
     public ResponseEntity<ResponseDto<Void>> deleteUserById(@RequestHeader("user-id") UUID userId) {
         userService.deleteUserById(userId);
-        return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "deleteUser"), HttpStatus.OK);
+        return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "delete User"), HttpStatus.OK);
     }
 
     //회원정보 수정
     @PatchMapping
     public ResponseEntity<ResponseDto<Void>> updateUserById(@RequestBody @Valid UserUpdateDto userUpdateDto, @RequestHeader("user-id") UUID userId) {
         userService.updateUserById(userUpdateDto, userId);
-        return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "updateUser"), HttpStatus.OK);
+        return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "update User"), HttpStatus.OK);
     }
 
     //로그인

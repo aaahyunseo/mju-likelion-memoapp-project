@@ -17,8 +17,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class ExceptionController {
 
     //UserNotFoundException 예외처리 핸들러
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ErrorResponseDto> handlerUserNotFoundException(UserNotFoundException userNotFoundException) {
+        this.writeLog(userNotFoundException);
         return new ResponseEntity<>(ErrorResponseDto.res(userNotFoundException), HttpStatus.NOT_FOUND);
     }
 
@@ -26,6 +28,7 @@ public class ExceptionController {
     @ExceptionHandler(MemoNotFoundException.class)
     public ResponseEntity<ErrorResponseDto> handleMemoNotFoundException(
             MemoNotFoundException memoNotFoundException) {
+        this.writeLog(memoNotFoundException);
         return new ResponseEntity<>(ErrorResponseDto.res(memoNotFoundException), HttpStatus.NOT_FOUND);
     }
 
@@ -33,14 +36,24 @@ public class ExceptionController {
     @ExceptionHandler(AlreadyExistException.class)
     public ResponseEntity<ErrorResponseDto> handleAlreadyExistException(
             AlreadyExistException alreadyExistException) {
+        this.writeLog(alreadyExistException);
         return new ResponseEntity<>(ErrorResponseDto.res(alreadyExistException), HttpStatus.CONFLICT);
     }
 
-    //AlreadyExistException 예외처리 핸들러
+    //LoginFalseException 예외처리 핸들러
     @ExceptionHandler(LoginFalseException.class)
     public ResponseEntity<ErrorResponseDto> handleLoginFalseException(
             LoginFalseException loginFalseException) {
+        this.writeLog(loginFalseException);
         return new ResponseEntity<>(ErrorResponseDto.res(loginFalseException), HttpStatus.UNAUTHORIZED);
+    }
+
+    //OrganizationNotFoundException 예외처리 핸들러
+    @ExceptionHandler(OrganizationNotFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handleLoginFalseException(
+            OrganizationNotFoundException organizationNotFoundException) {
+        this.writeLog(organizationNotFoundException);
+        return new ResponseEntity<>(ErrorResponseDto.res(organizationNotFoundException), HttpStatus.NOT_FOUND);
     }
 
     // 원인을 알 수 없는 예외 처리
@@ -55,15 +68,31 @@ public class ExceptionController {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponseDto> handleMethodArgumentNotValidException(
             MethodArgumentNotValidException methodArgumentNotValidException) {
+        this.writeLog(methodArgumentNotValidException);
+
         FieldError fieldError = methodArgumentNotValidException.getBindingResult().getFieldError();
+
         if (fieldError == null) {
             return new ResponseEntity<>(ErrorResponseDto.res(String.valueOf(HttpStatus.BAD_REQUEST.value()),
                     methodArgumentNotValidException), HttpStatus.BAD_REQUEST);
         }
+
         ErrorCode validationErrorCode = ErrorCode.resolveValidationErrorCode(fieldError.getCode());
         String detail = fieldError.getDefaultMessage();
         DtoValidationException dtoValidationException = new DtoValidationException(validationErrorCode, detail);
 
         return new ResponseEntity<>(ErrorResponseDto.res(dtoValidationException), HttpStatus.BAD_REQUEST);
+    }
+
+    private void writeLog(CustomException customException) {
+        String exceptionName = customException.getClass().getSimpleName();
+        ErrorCode errorCode = customException.getErrorCode();
+        String detail = customException.getDetail();
+
+        log.error("({}){}: {}", exceptionName, errorCode.getMessage(), detail);
+    }
+
+    private void writeLog(Exception exception) {
+        log.error("({}){}", exception.getClass().getSimpleName(), exception.getMessage());
     }
 }

@@ -10,5 +10,8 @@ import java.util.UUID;
 public interface OrganizationUserJpaRepository extends JpaRepository<OrganizationUser, UUID> {
     boolean existsByUserId(UUID userId);
 
-    void deleteByUserId(UUID userId);
+    boolean existsByOrganizationId(UUID id);
+
+    void removeByOrganizationId(UUID id);
+
 }

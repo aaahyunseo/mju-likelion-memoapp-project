@@ -1,7 +1,7 @@
 package com.example.memoapplication.controller;
 
-import com.example.memoapplication.dto.MemoCreateDto;
-import com.example.memoapplication.dto.MemoUpdateDto;
+import com.example.memoapplication.dto.request.MemoCreateDto;
+import com.example.memoapplication.dto.request.MemoUpdateDto;
 import com.example.memoapplication.dto.response.LikeListResponseData;
 import com.example.memoapplication.dto.response.MemoListResponseData;
 import com.example.memoapplication.dto.response.MemoResponseData;
@@ -52,7 +52,7 @@ public class MemoController {
     //memoId로 특정 메모 수정
     @PatchMapping("/{id}")
     public ResponseEntity<ResponseDto<Void>> updateMemoById(@RequestBody @Valid MemoUpdateDto memoUpdateDto, @RequestHeader("user-id") UUID userId, @PathVariable("id") UUID id) {
-        memoService.updateMemoById(memoUpdateDto, id, userId);
+        memoService.updateMemoById(memoUpdateDto, userId, id);
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "updateMemoById"), HttpStatus.OK);
     }
 

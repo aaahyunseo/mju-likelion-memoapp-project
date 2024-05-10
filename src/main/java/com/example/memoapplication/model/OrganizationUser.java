@@ -19,11 +19,11 @@ public class OrganizationUser extends BaseEntity {
     @Column(length = 50, nullable = false)// 길이는 50자 이하이고, 비어있을 수 없다.
     private String role;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organization_id")
     private Organization organization;
 }

@@ -24,7 +24,7 @@ import java.util.UUID;
 public abstract class BaseEntity {
 
     @Id     // PK 역할
-    @GeneratedValue(strategy = GenerationType.UUID)    // UUID로 자동 생성됨.
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "uuid2")    // UUID로 자동 생성됨.
     @Column(updatable = false, unique = true, nullable = false)     // 업데이트가 불가능하고, 고유하며, 비어있을 수 없다.
     private UUID id;
 

@@ -5,8 +5,8 @@ import com.example.memoapplication.dto.request.UserLoginDto;
 import com.example.memoapplication.dto.request.UserUpdateDto;
 import com.example.memoapplication.errorcode.ErrorCode;
 import com.example.memoapplication.exception.AlreadyExistException;
-import com.example.memoapplication.exception.LoginFalseException;
-import com.example.memoapplication.exception.UserNotFoundException;
+import com.example.memoapplication.exception.ForbiddenException;
+import com.example.memoapplication.exception.NotFoundException;
 import com.example.memoapplication.model.User;
 import com.example.memoapplication.repository.UserJpaRepository;
 import lombok.AllArgsConstructor;
@@ -37,45 +37,39 @@ public class UserService {
     }
 
     //회원탈퇴
-    public void deleteUserById(UUID userId) {
-
-        if (userJpaRepository.existsById(userId)) {
-            //userId 존재 시
-            userJpaRepository.deleteById(userId);
-            return;
-        }
-        throw new UserNotFoundException(ErrorCode.USER_NOT_FOUND);
+    public void deleteUserById(User user) {
+        userExists(user.getId());
+        userJpaRepository.deleteById(user.getId());
     }
 
     //회원정보 수정
-    public void updateUserById(UserUpdateDto userUpdateDto, UUID userId) {
+    public void updateUserById(UserUpdateDto userUpdateDto, User user) {
+        userExists(user.getId());
+        User userToUpdate = userJpaRepository.findUserById(user.getId());
+        userToUpdate.setName(userUpdateDto.getName());
+        userToUpdate.setEmail(userUpdateDto.getEmail());
 
-        if (userJpaRepository.existsById(userId)) {
-            //userId 존재 시
-            User userToUpdate = userJpaRepository.findUserById(userId);
-            userToUpdate.setName(userUpdateDto.getName());
-            userToUpdate.setEmail(userUpdateDto.getEmail());
-
-            userJpaRepository.save(userToUpdate);
-            return;
-        }
-        throw new UserNotFoundException(ErrorCode.USER_NOT_FOUND);
+        userJpaRepository.save(userToUpdate);
     }
 
     //로그인
     public void login(UserLoginDto userLoginDto, UUID userId) {
-        if (userJpaRepository.existsById(userId)) {
-            //userId 존재 시
-            if (userJpaRepository.existsByEmail(userLoginDto.getEmail())) {
-                //email 일치 시
-                if (userJpaRepository.existsByPassword(userLoginDto.getPassword())) {
-                    //password 일치 시
-                    return;
-                }
-                throw new LoginFalseException(ErrorCode.LOGIN_FALSE, "password가 일치하지 않습니다.");
+        userExists(userId);
+        if (userJpaRepository.existsByEmail(userLoginDto.getEmail())) {
+            //email 일치 시
+            if (userJpaRepository.existsByPassword(userLoginDto.getPassword())) {
+                //password 일치 시
+                return;
             }
-            throw new LoginFalseException(ErrorCode.LOGIN_FALSE, "email이 일치하지 않습니다.");
+            throw new ForbiddenException(ErrorCode.LOGIN_FALSE, "password가 일치하지 않습니다.");
         }
-        throw new UserNotFoundException(ErrorCode.USER_NOT_FOUND);
+        throw new ForbiddenException(ErrorCode.LOGIN_FALSE, "email이 일치하지 않습니다.");
+    }
+
+    //user 존재 여부
+    public void userExists(UUID userId) {
+        if (!userJpaRepository.existsById(userId)) {
+            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
+        }
     }
 }

@@ -16,44 +16,34 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class ExceptionController {
 
-    //UserNotFoundException 예외처리 핸들러
+    //NotFoundException 예외처리 핸들러
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<ErrorResponseDto> handlerUserNotFoundException(UserNotFoundException userNotFoundException) {
-        this.writeLog(userNotFoundException);
-        return new ResponseEntity<>(ErrorResponseDto.res(userNotFoundException), HttpStatus.NOT_FOUND);
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handlerNotFoundException(NotFoundException notFoundException) {
+        this.writeLog(notFoundException);
+        HttpStatus httpStatus = HttpStatus.valueOf(HttpStatus.NOT_FOUND.value());
+        return new ResponseEntity<>(ErrorResponseDto.res(notFoundException), httpStatus);
     }
 
-    //MemoNotFoundException 예외처리 핸들러
-    @ExceptionHandler(MemoNotFoundException.class)
-    public ResponseEntity<ErrorResponseDto> handleMemoNotFoundException(
-            MemoNotFoundException memoNotFoundException) {
-        this.writeLog(memoNotFoundException);
-        return new ResponseEntity<>(ErrorResponseDto.res(memoNotFoundException), HttpStatus.NOT_FOUND);
-    }
 
     //AlreadyExistException 예외처리 핸들러
+    @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(AlreadyExistException.class)
     public ResponseEntity<ErrorResponseDto> handleAlreadyExistException(
             AlreadyExistException alreadyExistException) {
         this.writeLog(alreadyExistException);
-        return new ResponseEntity<>(ErrorResponseDto.res(alreadyExistException), HttpStatus.CONFLICT);
+        HttpStatus httpStatus = HttpStatus.valueOf(ErrorCode.ALREADY_EXIST.getCode().substring(0, 2));
+        return new ResponseEntity<>(ErrorResponseDto.res(alreadyExistException), httpStatus);
     }
 
     //LoginFalseException 예외처리 핸들러
-    @ExceptionHandler(LoginFalseException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(ForbiddenException.class)
     public ResponseEntity<ErrorResponseDto> handleLoginFalseException(
-            LoginFalseException loginFalseException) {
-        this.writeLog(loginFalseException);
-        return new ResponseEntity<>(ErrorResponseDto.res(loginFalseException), HttpStatus.UNAUTHORIZED);
-    }
-
-    //OrganizationNotFoundException 예외처리 핸들러
-    @ExceptionHandler(OrganizationNotFoundException.class)
-    public ResponseEntity<ErrorResponseDto> handleLoginFalseException(
-            OrganizationNotFoundException organizationNotFoundException) {
-        this.writeLog(organizationNotFoundException);
-        return new ResponseEntity<>(ErrorResponseDto.res(organizationNotFoundException), HttpStatus.NOT_FOUND);
+            ForbiddenException forbiddenException) {
+        this.writeLog(forbiddenException);
+        HttpStatus httpStatus = HttpStatus.valueOf(ErrorCode.LOGIN_FALSE.getCode().substring(0, 2));
+        return new ResponseEntity<>(ErrorResponseDto.res(forbiddenException), httpStatus);
     }
 
     // 원인을 알 수 없는 예외 처리
@@ -65,11 +55,11 @@ public class ExceptionController {
                 HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponseDto> handleMethodArgumentNotValidException(
             MethodArgumentNotValidException methodArgumentNotValidException) {
         this.writeLog(methodArgumentNotValidException);
-
         FieldError fieldError = methodArgumentNotValidException.getBindingResult().getFieldError();
 
         if (fieldError == null) {

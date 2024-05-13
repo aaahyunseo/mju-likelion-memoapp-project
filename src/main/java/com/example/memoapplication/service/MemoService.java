@@ -7,10 +7,10 @@ import com.example.memoapplication.dto.response.MemoListResponseData;
 import com.example.memoapplication.dto.response.MemoResponseData;
 import com.example.memoapplication.errorcode.ErrorCode;
 import com.example.memoapplication.exception.AlreadyExistException;
-import com.example.memoapplication.exception.MemoNotFoundException;
-import com.example.memoapplication.exception.UserNotFoundException;
+import com.example.memoapplication.exception.NotFoundException;
 import com.example.memoapplication.model.Memo;
 import com.example.memoapplication.model.MemoLike;
+import com.example.memoapplication.model.User;
 import com.example.memoapplication.repository.LikeJpaRepository;
 import com.example.memoapplication.repository.MemoJpaRepository;
 import com.example.memoapplication.repository.UserJpaRepository;
@@ -18,6 +18,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,9 +31,9 @@ public class MemoService {
     private final UserJpaRepository userJpaRepository;
 
     //메모 생성
-    public void createMemo(MemoCreateDto memoCreateDto, UUID userId) {
+    public void createMemo(MemoCreateDto memoCreateDto, User user) {
         Memo newMemo = Memo.builder()
-                .user(userJpaRepository.findUserById(userId))
+                .user(userJpaRepository.findUserById(user.getId()))
                 .title(memoCreateDto.getTitle())
                 .content(memoCreateDto.getContent())
                 .build();
@@ -40,90 +41,92 @@ public class MemoService {
     }
 
     //메모 전체 조회
-    public MemoListResponseData getAllMemo(UUID userId) {
-        if (memoJpaRepository.existsByUserId(userId)) {
-            //userId 존재 시
-            List<Memo> memoList = memoJpaRepository.findAllByUserId(userId);
-            MemoListResponseData memoListResponseData = MemoListResponseData.builder().memoList(memoList).build();
-            return memoListResponseData;
+    public MemoListResponseData getAllMemo(User user) {
+        User u = userJpaRepository.findUserById(user.getId());
+        userExistsInMemo(u.getId());
+        List<Memo> memoList = memoJpaRepository.findAllByUser(u);
+        List<MemoResponseData> memoResponseDataList = new ArrayList<>();
+        for (Memo memo : memoList) {
+            MemoResponseData memoResponseData = MemoResponseData.builder()
+                    .title(memo.getTitle())
+                    .content(memo.getContent())
+                    .build();
+            memoResponseDataList.add(memoResponseData);
         }
-        throw new UserNotFoundException(ErrorCode.USER_NOT_FOUND);
+        MemoListResponseData memoListResponseData = MemoListResponseData.builder().memoList(memoResponseDataList).build();
+        return memoListResponseData;
     }
 
     //id로 특정 메모 조회
-    public MemoResponseData getMemoById(UUID userId, UUID id) {
-        if (memoJpaRepository.existsByUserId(userId)) {
-            //userId 존재 시
-            if (memoJpaRepository.existsById(id)) {
-                //memoId 존재 시
-                MemoResponseData memoResponseData = MemoResponseData.builder().memo(memoJpaRepository.findMemoById(id)).build();
-                return memoResponseData;
-            }
-            throw new MemoNotFoundException(ErrorCode.MEMO_NOT_FOUND, "메모 ID가 일치하지 않아 메모 조회 실패");
-        }
-        throw new UserNotFoundException(ErrorCode.USER_NOT_FOUND);
+    public MemoResponseData getMemoById(User user, UUID id) {
+        userExistsInMemo(user.getId());
+        memoExists(id);
+        Memo memo = memoJpaRepository.findMemoById(id);
+        MemoResponseData memoResponseData = MemoResponseData.builder()
+                .title(memo.getTitle())
+                .content(memo.getContent())
+                .build();
+        return memoResponseData;
     }
 
     //id로 특정 메모 삭제
-    public void deleteMemoById(UUID userId, UUID id) {
-        if (memoJpaRepository.existsByUserId(userId)) {
-            //userId 존재 시
-            if (memoJpaRepository.existsById(id)) {
-                memoJpaRepository.deleteById(id);
-                return;
-            }
-            throw new MemoNotFoundException(ErrorCode.MEMO_NOT_FOUND, "메모 ID가 일치하지 않아 메모 삭제 실패");
-        }
-        throw new UserNotFoundException(ErrorCode.USER_NOT_FOUND);
+    public void deleteMemoById(User user, UUID id) {
+        userExistsInMemo(user.getId());
+        memoExists(id);
+        memoJpaRepository.deleteById(id);
     }
 
     //id로 특정 메모 수정
-    public void updateMemoById(MemoUpdateDto memoUpdateDto, UUID userId, UUID id) {
-        if (memoJpaRepository.existsByUserId(userId)) {
-            //userId 존재 시
-            if (memoJpaRepository.existsById(id)) {
-                //memoId 존재 시
-                Memo memoToUpdate = memoJpaRepository.findMemoById(id);
-                memoToUpdate.setTitle(memoUpdateDto.getTitle());
-                memoToUpdate.setContent(memoUpdateDto.getContent());
+    public void updateMemoById(MemoUpdateDto memoUpdateDto, User user, UUID id) {
+        userExistsInMemo(user.getId());
+        memoExists(id);
 
-                memoJpaRepository.save(memoToUpdate);
-                return;
-            }
-            throw new MemoNotFoundException(ErrorCode.MEMO_NOT_FOUND, "메모 ID가 일치하지 않아 메모 수정 실패");
-        }
-        throw new UserNotFoundException(ErrorCode.USER_NOT_FOUND);
+        User u = userJpaRepository.findUserById(user.getId());
+        Memo memoToUpdate = memoJpaRepository.findMemoByUser(u);
+        memoToUpdate.setTitle(memoUpdateDto.getTitle());
+        memoToUpdate.setContent(memoUpdateDto.getContent());
+
+        memoJpaRepository.save(memoToUpdate);
     }
 
     //메모 like 기능 구현
-    public void likeMemo(UUID userId, UUID id) {
-        if (!likeJpaRepository.existsByUserId(userId)) {
-            //userId 중복이 아닐 경우
-            if (memoJpaRepository.existsById(id)) {
-                //memoId 존재 시
-                MemoLike like = MemoLike.builder()
-                        .memo(memoJpaRepository.findMemoById(id))
-                        .user(userJpaRepository.findUserById(userId))
-                        .build();
-                likeJpaRepository.save(like);
-                return;
-            }
-            throw new MemoNotFoundException(ErrorCode.MEMO_NOT_FOUND, "메모 ID가 일치하지 않아 메모 좋아요 실패");
+    public void likeMemo(User user, UUID id) {
+        User u = userJpaRepository.findUserById(user.getId());
+        if (!likeJpaRepository.existsByUser(u)) {    //userId 중복 검사
+            MemoLike like = MemoLike.builder()
+                    .memo(memoJpaRepository.findMemoById(id))
+                    .user(userJpaRepository.findUserById(user.getId()))
+                    .build();
+            likeJpaRepository.save(like);
+            return;
         }
         throw new AlreadyExistException(ErrorCode.ALREADY_EXIST, "이미 좋아요를 눌렀습니다.");
     }
 
     //likeList 조회
     public LikeListResponseData getLikeList(UUID id) {
-        if (memoJpaRepository.existsById(id)) {
-            //memoId 존재 시
-            List<MemoLike> likeList = likeJpaRepository.findAllById(id);
-            LikeListResponseData likeListResponseData = LikeListResponseData.builder()
-                    .likeList(likeList)
-                    .likeCount(likeList.size())
-                    .build();
-            return likeListResponseData;
+        memoExists(id);
+        Memo memo = memoJpaRepository.findMemoById(id);
+        List<MemoLike> likeList = likeJpaRepository.findAllByMemo(memo);
+        LikeListResponseData likeListResponseData = LikeListResponseData.builder()
+                .title(memo.getTitle())
+                .likeCount(likeList.size())
+                .build();
+        return likeListResponseData;
+    }
+
+    //메모 안 user 존재 여부
+    public void userExistsInMemo(UUID userId) {
+        User user = userJpaRepository.findUserById(userId);
+        if (!memoJpaRepository.existsByUser(user)) {
+            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
         }
-        throw new MemoNotFoundException(ErrorCode.MEMO_NOT_FOUND, "메모 ID가 일치하지 않아 메모 좋아요 리스트 조회 실패");
+    }
+
+    //메모 존재 여부
+    public void memoExists(UUID id) {
+        if (!memoJpaRepository.existsById(id)) {
+            throw new NotFoundException(ErrorCode.MEMO_NOT_FOUND);
+        }
     }
 }

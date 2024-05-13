@@ -1,8 +1,10 @@
 package com.example.memoapplication.controller;
 
+import com.example.memoapplication.annotation.AuthenticatedUser;
 import com.example.memoapplication.dto.request.OrganizationCreateDto;
 import com.example.memoapplication.dto.request.OrganizationJoinDto;
 import com.example.memoapplication.dto.response.ResponseDto;
+import com.example.memoapplication.model.User;
 import com.example.memoapplication.service.OrganizationService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -28,16 +30,16 @@ public class OrganizationController {
 
     //Organization 가입
     @PostMapping("/{id}")
-    public ResponseEntity<ResponseDto<Void>> joinOrganization(@RequestHeader("user-id") UUID userId, @PathVariable UUID id, @RequestBody @Valid OrganizationJoinDto organizationJoinDto) {
-        organizationService.joinOrganization(organizationJoinDto, userId, id);
+    public ResponseEntity<ResponseDto<Void>> joinOrganization(@AuthenticatedUser User user, @PathVariable UUID id, @RequestBody @Valid OrganizationJoinDto organizationJoinDto) {
+        organizationService.joinOrganization(organizationJoinDto, user, id);
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.CREATED, "Join success"), HttpStatus.CREATED);
     }
 
     //Organization 탈퇴
     @DeleteMapping("/{id}")
     public ResponseEntity<ResponseDto<
-            Void>> deleteOrganization(@RequestHeader("user-id") UUID userId, @PathVariable UUID id) {
-        organizationService.deleteOrganization(userId, id);
+            Void>> deleteOrganization(@AuthenticatedUser User user, @PathVariable UUID id) {
+        organizationService.deleteOrganization(user, id);
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "Withdrawal success"), HttpStatus.OK);
     }
 }

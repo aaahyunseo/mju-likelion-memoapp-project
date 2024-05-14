@@ -80,7 +80,7 @@ public class MemoService {
     public void updateMemoById(MemoUpdateDto memoUpdateDto, User user, UUID id) {
         userExistsInMemo(user);
         memoExists(id);
-        Memo memoToUpdate = memoJpaRepository.findMemoByUser(user);
+        Memo memoToUpdate = memoJpaRepository.findMemoById(id);
         memoToUpdate.setTitle(memoUpdateDto.getTitle());
         memoToUpdate.setContent(memoUpdateDto.getContent());
 
@@ -89,7 +89,7 @@ public class MemoService {
 
     //메모 like 기능 구현
     public void likeMemo(User user, UUID id) {
-        if (!likeJpaRepository.existsByUser(user)) {    //userId 중복 검사
+        if (!likeJpaRepository.existsByUser(user)) {    //user 중복 검사
             MemoLike like = MemoLike.builder()
                     .memo(memoJpaRepository.findMemoById(id))
                     .user(userJpaRepository.findUserById(user.getId()))

@@ -32,7 +32,7 @@ public class ExceptionController {
     public ResponseEntity<ErrorResponseDto> handleAlreadyExistException(
             AlreadyExistException alreadyExistException) {
         this.writeLog(alreadyExistException);
-        HttpStatus httpStatus = HttpStatus.valueOf(ErrorCode.ALREADY_EXIST.getCode());
+        HttpStatus httpStatus = HttpStatus.valueOf(HttpStatus.CONFLICT.value());
         return new ResponseEntity<>(ErrorResponseDto.res(alreadyExistException), httpStatus);
     }
 

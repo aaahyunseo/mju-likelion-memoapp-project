@@ -18,9 +18,9 @@ import lombok.experimental.SuperBuilder;
 @Entity(name = "memo_like")
 public class MemoLike extends BaseEntity {
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     private Memo memo;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 }

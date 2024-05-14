@@ -51,15 +51,17 @@ public class UserController {
     public ResponseEntity<ResponseDto<Void>> login(@RequestHeader("user-id") UUID userId,
                                                    HttpServletResponse response) {
 
-        String payload = userId.toString();
+        String payload = userId.toString();     //user의 id를 payload로 사용
+        //AccessToken 생성
         String accessToken = jwtTokenProvider.createToken(payload);
+        //쿠키 생성
         ResponseCookie cookie = ResponseCookie.from("AccessToken", accessToken)
                 .maxAge(Duration.ofMillis(1800000))// 30분
                 .path("/")// 모든 경로에서 접근 가능
                 .build();
-
+        //HTTP response 헤더에 생성한 쿠키 포함
         response.addHeader("set-cookie", cookie.toString());
-        return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "login success!"), HttpStatus.OK);
+        return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "AccessToken=" + accessToken), HttpStatus.OK);
     }
 
     @GetMapping("/test")

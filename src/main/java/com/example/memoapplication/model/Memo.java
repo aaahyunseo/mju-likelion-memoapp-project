@@ -25,7 +25,7 @@ public class Memo extends BaseEntity {
     @Column(length = 2000, nullable = false)// 길이는 2000자 이하이고, 비어있을 수 없다.
     private String content;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)    //user와 연관관계 false.
     private User user;
 
     @OneToMany(mappedBy = "memo", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

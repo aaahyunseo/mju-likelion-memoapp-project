@@ -32,7 +32,7 @@ public class ExceptionController {
     public ResponseEntity<ErrorResponseDto> handleAlreadyExistException(
             AlreadyExistException alreadyExistException) {
         this.writeLog(alreadyExistException);
-        HttpStatus httpStatus = HttpStatus.valueOf(ErrorCode.ALREADY_EXIST.getCode().substring(0, 2));
+        HttpStatus httpStatus = HttpStatus.valueOf(ErrorCode.ALREADY_EXIST.getCode());
         return new ResponseEntity<>(ErrorResponseDto.res(alreadyExistException), httpStatus);
     }
 
@@ -42,8 +42,19 @@ public class ExceptionController {
     public ResponseEntity<ErrorResponseDto> handleLoginFalseException(
             ForbiddenException forbiddenException) {
         this.writeLog(forbiddenException);
-        HttpStatus httpStatus = HttpStatus.valueOf(ErrorCode.LOGIN_FALSE.getCode().substring(0, 2));
+        HttpStatus httpStatus = HttpStatus.valueOf(ErrorCode.LOGIN_FALSE.getCode());
         return new ResponseEntity<>(ErrorResponseDto.res(forbiddenException), httpStatus);
+    }
+
+
+    //InvalidTokenException 예외처리 핸들러
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<ErrorResponseDto> handleLoginFalseException(
+            InvalidTokenException invalidTokenException) {
+        this.writeLog(invalidTokenException);
+        HttpStatus httpStatus = HttpStatus.valueOf(ErrorCode.TOKEN_INVALID.getCode());
+        return new ResponseEntity<>(ErrorResponseDto.res(invalidTokenException), httpStatus);
     }
 
     // 원인을 알 수 없는 예외 처리

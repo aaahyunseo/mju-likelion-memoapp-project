@@ -41,8 +41,9 @@ public class Interceptor implements HandlerInterceptor {
         authenticationContext.setPrincipal(user);
         return true;
     }
-    
+
     private User findExistingUser(final UUID userId) {
+        //user 검증
         return userJpaRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
     }

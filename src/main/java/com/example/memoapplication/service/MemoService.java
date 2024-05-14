@@ -3,6 +3,7 @@ package com.example.memoapplication.service;
 import com.example.memoapplication.dto.request.MemoCreateDto;
 import com.example.memoapplication.dto.request.MemoUpdateDto;
 import com.example.memoapplication.dto.response.LikeListResponseData;
+import com.example.memoapplication.dto.response.LikeResponseDto;
 import com.example.memoapplication.dto.response.MemoListResponseData;
 import com.example.memoapplication.dto.response.MemoResponseData;
 import com.example.memoapplication.errorcode.ErrorCode;
@@ -42,24 +43,23 @@ public class MemoService {
 
     //메모 전체 조회
     public MemoListResponseData getAllMemo(User user) {
-        User u = userJpaRepository.findUserById(user.getId());
-        userExistsInMemo(u.getId());
-        List<Memo> memoList = memoJpaRepository.findAllByUser(u);
-        List<MemoResponseData> memoResponseDataList = new ArrayList<>();
+        userExistsInMemo(user);
+        List<Memo> memoList = memoJpaRepository.findAllByUser(user);
+        List<MemoResponseData> list = new ArrayList<>();
         for (Memo memo : memoList) {
             MemoResponseData memoResponseData = MemoResponseData.builder()
                     .title(memo.getTitle())
                     .content(memo.getContent())
                     .build();
-            memoResponseDataList.add(memoResponseData);
+            list.add(memoResponseData);
         }
-        MemoListResponseData memoListResponseData = MemoListResponseData.builder().memoList(memoResponseDataList).build();
+        MemoListResponseData memoListResponseData = MemoListResponseData.builder().memoList(list).build();
         return memoListResponseData;
     }
 
     //id로 특정 메모 조회
     public MemoResponseData getMemoById(User user, UUID id) {
-        userExistsInMemo(user.getId());
+        userExistsInMemo(user);
         memoExists(id);
         Memo memo = memoJpaRepository.findMemoById(id);
         MemoResponseData memoResponseData = MemoResponseData.builder()
@@ -71,18 +71,16 @@ public class MemoService {
 
     //id로 특정 메모 삭제
     public void deleteMemoById(User user, UUID id) {
-        userExistsInMemo(user.getId());
+        userExistsInMemo(user);
         memoExists(id);
         memoJpaRepository.deleteById(id);
     }
 
     //id로 특정 메모 수정
     public void updateMemoById(MemoUpdateDto memoUpdateDto, User user, UUID id) {
-        userExistsInMemo(user.getId());
+        userExistsInMemo(user);
         memoExists(id);
-
-        User u = userJpaRepository.findUserById(user.getId());
-        Memo memoToUpdate = memoJpaRepository.findMemoByUser(u);
+        Memo memoToUpdate = memoJpaRepository.findMemoByUser(user);
         memoToUpdate.setTitle(memoUpdateDto.getTitle());
         memoToUpdate.setContent(memoUpdateDto.getContent());
 
@@ -91,8 +89,7 @@ public class MemoService {
 
     //메모 like 기능 구현
     public void likeMemo(User user, UUID id) {
-        User u = userJpaRepository.findUserById(user.getId());
-        if (!likeJpaRepository.existsByUser(u)) {    //userId 중복 검사
+        if (!likeJpaRepository.existsByUser(user)) {    //userId 중복 검사
             MemoLike like = MemoLike.builder()
                     .memo(memoJpaRepository.findMemoById(id))
                     .user(userJpaRepository.findUserById(user.getId()))
@@ -108,16 +105,25 @@ public class MemoService {
         memoExists(id);
         Memo memo = memoJpaRepository.findMemoById(id);
         List<MemoLike> likeList = likeJpaRepository.findAllByMemo(memo);
+        List<LikeResponseDto> list = new ArrayList<>();
+
+        for (MemoLike memoLike : likeList) {
+            LikeResponseDto likeResponseDto = LikeResponseDto.builder()
+                    .name(memoLike.getUser().getName())
+                    .title(memoLike.getMemo().getTitle())
+                    .build();
+            list.add(likeResponseDto);
+        }
+
         LikeListResponseData likeListResponseData = LikeListResponseData.builder()
-                .title(memo.getTitle())
                 .likeCount(likeList.size())
+                .likeList(list)
                 .build();
         return likeListResponseData;
     }
 
     //메모 안 user 존재 여부
-    public void userExistsInMemo(UUID userId) {
-        User user = userJpaRepository.findUserById(userId);
+    public void userExistsInMemo(User user) {
         if (!memoJpaRepository.existsByUser(user)) {
             throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
         }

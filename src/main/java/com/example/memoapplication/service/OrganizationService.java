@@ -34,14 +34,12 @@ public class OrganizationService {
                     .name(organizationCreateDto.getName())
                     .build();
             organizationJpaRepository.save(organization);
-            return;
         }
         throw new AlreadyExistException(ErrorCode.ALREADY_EXIST, "이미 존재하는 organization 입니다.");
     }
 
     //organization 가입
     public void joinOrganization(OrganizationJoinDto organizationJoinDto, User user, UUID id) {
-        organizationExists(id);
         OrganizationUser organizationUser = OrganizationUser.builder()
                 .user(userJpaRepository.findUserById(user.getId()))
                 .organization(organizationJpaRepository.findOrganizationById(id))
@@ -52,24 +50,10 @@ public class OrganizationService {
 
     //organization 탈퇴
     public void deleteOrganization(User user, UUID id) {
-        userExists(user.getId());
-        organizationExists(id);
-        organizationUserJpaRepository.removeByOrganizationId(id);
-    }
-
-    //organization 존재 여부
-    public void organizationExists(UUID id) {
-        if (!organizationUserJpaRepository.existsByOrganizationId(id)) {
-            //organization 존재하지 않을 경우
-            throw new NotFoundException(ErrorCode.ORGANIZATION_NOT_FOUND);
+        if (organizationUserJpaRepository.existsByUser(user)) {
+            organizationUserJpaRepository.removeByOrganizationId(id);
+            return;
         }
+        throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
     }
-
-    //user 존재 여부
-    public void userExists(UUID userId) {
-        if (!userJpaRepository.existsById(userId)) {
-            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
-        }
-    }
-
 }

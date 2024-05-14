@@ -15,18 +15,18 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 public class AuthenticatedUserArgumentResolver implements HandlerMethodArgumentResolver {
     private final AuthenticationContext authenticationContext;
 
+    //어떤 어노테이션의 기능인지
     @Override
     public boolean supportsParameter(final MethodParameter parameter) {
-        //어떤 어노테이션의 기능인지
         return parameter.hasParameterAnnotation(AuthenticatedUser.class);
     }
 
+    //해당 어노테이션의 실제 동작 정의 - 검증된 User 객체를 반환
     @Override
     public User resolveArgument(final MethodParameter parameter,
                                 final ModelAndViewContainer mavContainer,
                                 final NativeWebRequest webRequest,
                                 final WebDataBinderFactory binderFactory) {
-        //해당 어노테이션의 실제 동작 정의 - 검증된 User 객체를 반환
         return authenticationContext.getPrincipal();
     }
 }

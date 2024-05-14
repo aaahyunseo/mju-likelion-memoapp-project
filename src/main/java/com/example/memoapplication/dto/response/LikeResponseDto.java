@@ -3,9 +3,9 @@ package com.example.memoapplication.dto.response;
 import lombok.Builder;
 import lombok.Getter;
 
-@Builder
 @Getter
-public class MemoResponseData {
+@Builder
+public class LikeResponseDto {
     private final String title;     //메모 title
-    private final String content;   //메모 content
+    private final String name;      //유저 name
 }

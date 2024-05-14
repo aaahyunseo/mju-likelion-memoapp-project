@@ -19,12 +19,15 @@ public class Config implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(final InterceptorRegistry registry) {
+        //인터셉터 등록
         registry.addInterceptor(interceptor)
-                .addPathPatterns("/users", "/users/**", "/memos/**", "/organizations/**");
+                .addPathPatterns("/users/**", "/memos/**", "/organizations/**")
+                .excludePathPatterns("/users/login");
     }
 
     @Override
     public void addArgumentResolvers(final List<HandlerMethodArgumentResolver> resolvers) {
+        //어노테이션 등록
         resolvers.add(authenticatedUserArgumentResolver);
     }
 

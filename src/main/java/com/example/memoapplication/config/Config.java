@@ -22,7 +22,7 @@ public class Config implements WebMvcConfigurer {
         //인터셉터 등록
         registry.addInterceptor(interceptor)
                 .addPathPatterns("/users/**", "/memos/**", "/organizations/**")
-                .excludePathPatterns("/users/login");
+                .excludePathPatterns("/users/login", "/users/sign-up");
     }
 
     @Override

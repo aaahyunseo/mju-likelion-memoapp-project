@@ -4,7 +4,6 @@ import com.example.memoapplication.dto.request.OrganizationCreateDto;
 import com.example.memoapplication.dto.request.OrganizationJoinDto;
 import com.example.memoapplication.errorcode.ErrorCode;
 import com.example.memoapplication.exception.AlreadyExistException;
-import com.example.memoapplication.exception.NotFoundException;
 import com.example.memoapplication.model.Organization;
 import com.example.memoapplication.model.OrganizationUser;
 import com.example.memoapplication.model.User;
@@ -40,6 +39,11 @@ public class OrganizationService {
 
     //organization 가입
     public void joinOrganization(OrganizationJoinDto organizationJoinDto, User user, UUID id) {
+        Organization organization = organizationJpaRepository.findOrganizationById(id);
+        //중복 가입 여부 확인
+        if (organizationUserJpaRepository.existsByUserAndOrganization(user, organization)) {
+            throw new AlreadyExistException(ErrorCode.ALREADY_EXIST, "이미 가입된 회원 입니다.");
+        }
         OrganizationUser organizationUser = OrganizationUser.builder()
                 .user(userJpaRepository.findUserById(user.getId()))
                 .organization(organizationJpaRepository.findOrganizationById(id))
@@ -49,11 +53,7 @@ public class OrganizationService {
     }
 
     //organization 탈퇴
-    public void deleteOrganization(User user, UUID id) {
-        if (organizationUserJpaRepository.existsByUser(user)) {
-            organizationUserJpaRepository.removeByOrganizationId(id);
-            return;
-        }
-        throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
+    public void deleteOrganization(UUID id) {
+        organizationUserJpaRepository.removeByOrganizationId(id);
     }
 }

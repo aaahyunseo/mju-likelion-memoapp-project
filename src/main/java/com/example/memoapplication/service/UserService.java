@@ -38,10 +38,8 @@ public class UserService {
 
     //회원정보 수정
     public void updateUserById(UserUpdateDto userUpdateDto, User user) {
-        User userToUpdate = userJpaRepository.findUserById(user.getId());
-        userToUpdate.setName(userUpdateDto.getName());
-        userToUpdate.setEmail(userUpdateDto.getEmail());
-
-        userJpaRepository.save(userToUpdate);
+        user.setName(userUpdateDto.getName());
+        user.setEmail(userUpdateDto.getEmail());
+        userJpaRepository.save(user);
     }
 }

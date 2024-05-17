@@ -10,10 +10,7 @@ import java.util.UUID;
 
 @Repository
 public interface OrganizationUserJpaRepository extends JpaRepository<OrganizationUser, UUID> {
-    boolean existsByOrganization(Organization organization);
-
-    boolean existsByUser(User user);
-
     void removeByOrganizationId(UUID id);
 
+    boolean existsByUserAndOrganization(User user, Organization organization);
 }

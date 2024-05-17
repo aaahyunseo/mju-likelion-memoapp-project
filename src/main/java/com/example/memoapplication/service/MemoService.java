@@ -8,6 +8,7 @@ import com.example.memoapplication.dto.response.MemoListResponseData;
 import com.example.memoapplication.dto.response.MemoResponseData;
 import com.example.memoapplication.errorcode.ErrorCode;
 import com.example.memoapplication.exception.AlreadyExistException;
+import com.example.memoapplication.exception.ForbiddenException;
 import com.example.memoapplication.exception.NotFoundException;
 import com.example.memoapplication.model.Memo;
 import com.example.memoapplication.model.MemoLike;
@@ -89,10 +90,11 @@ public class MemoService {
 
     //메모 like 기능 구현
     public void likeMemo(User user, UUID id) {
+        memoExists(id);
         if (!likeJpaRepository.existsByUser(user)) {    //user 중복 검사
             MemoLike like = MemoLike.builder()
                     .memo(memoJpaRepository.findMemoById(id))
-                    .user(userJpaRepository.findUserById(user.getId()))
+                    .user(user)
                     .build();
             likeJpaRepository.save(like);
             return;
@@ -125,7 +127,7 @@ public class MemoService {
     //메모 안 user 존재 여부
     public void userExistsInMemo(User user) {
         if (!memoJpaRepository.existsByUser(user)) {
-            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
+            throw new ForbiddenException(ErrorCode.NO_ACCESS, "접근할 수 없는 메모입니다.");
         }
     }
 

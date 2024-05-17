@@ -36,13 +36,13 @@ public class ExceptionController {
         return new ResponseEntity<>(ErrorResponseDto.res(alreadyExistException), httpStatus);
     }
 
-    //LoginFalseException 예외처리 핸들러
+    //ForbiddenException 예외처리 핸들러
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler(ForbiddenException.class)
-    public ResponseEntity<ErrorResponseDto> handleLoginFalseException(
+    public ResponseEntity<ErrorResponseDto> handleForbiddenException(
             ForbiddenException forbiddenException) {
         this.writeLog(forbiddenException);
-        HttpStatus httpStatus = HttpStatus.valueOf(ErrorCode.LOGIN_FALSE.getCode());
+        HttpStatus httpStatus = HttpStatus.valueOf(HttpStatus.FORBIDDEN.value());
         return new ResponseEntity<>(ErrorResponseDto.res(forbiddenException), httpStatus);
     }
 

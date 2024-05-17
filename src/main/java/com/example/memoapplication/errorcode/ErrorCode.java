@@ -6,15 +6,19 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum ErrorCode {
+    //NotFoundException
     USER_NOT_FOUND("4040", "유저를 찾을 수 없습니다."),
     MEMO_NOT_FOUND("4041", "메모를 찾을 수 없습니다."),
     ORGANIZATION_NOT_FOUND("4042", "조직을 찾을 수 없습니다."),
     TOKEN_NOT_FOUND("4043", "토큰을 찾을 수 없습니다."),
 
+    //AlreadyExistException
     ALREADY_EXIST("4090", "이미 존재하는 회원입니다."),
 
+    //ForbiddenException
     LOGIN_FALSE("4031", "로그인에 실패하였습니다."),
     TOKEN_INVALID("4032", "유효하지 않는 토큰입니다."),
+    NO_ACCESS("4033", "접근 권한이 없습니다."),
 
     NOT_NULL("9001", "필수값이 누락되었습니다."),
     NOT_BLANK("9002", "필수값이 빈 값이거나 공백으로 되어있습니다.");

@@ -4,6 +4,7 @@ import com.example.memoapplication.authentication.AuthenticationContext;
 import com.example.memoapplication.authentication.AuthenticationExtractor;
 import com.example.memoapplication.authentication.JwtTokenProvider;
 import com.example.memoapplication.errorcode.ErrorCode;
+import com.example.memoapplication.exception.ForbiddenException;
 import com.example.memoapplication.exception.NotFoundException;
 import com.example.memoapplication.model.User;
 import com.example.memoapplication.repository.UserJpaRepository;
@@ -31,6 +32,10 @@ public class Interceptor implements HandlerInterceptor {
                              final Object handler) {
         log.info("Interceptor preHandle");
 
+//        if (!userJpaRepository.existsByEmail(request.getHeader("email"))
+//                || !userJpaRepository.existsByPassword(request.getHeader("password"))) {
+//            throw new ForbiddenException(ErrorCode.LOGIN_FALSE, "email과 password가 일치하지 않습니다.");
+//        }
         //HttpServletReqeust에서 accessToken 추출
         String accessToken = AuthenticationExtractor.extract(request);
         //Jwt Token에서 payload 안에 userId 추출

@@ -26,7 +26,7 @@ public class UserController {
     private final JwtTokenProvider jwtTokenProvider;
 
     //회원가입
-    @PostMapping
+    @PostMapping("/sign-up")
     public ResponseEntity<ResponseDto<Void>> joinUser(@RequestBody @Valid UserCreateDto userCreateDto) {
         userService.createUser(userCreateDto);
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.CREATED, "sign Up"), HttpStatus.CREATED);
@@ -51,17 +51,17 @@ public class UserController {
     public ResponseEntity<ResponseDto<Void>> login(@RequestHeader("user-id") UUID userId,
                                                    HttpServletResponse response) {
 
-        String payload = userId.toString();     //user의 id를 payload로 사용
+        //user의 id를 payload로 사용
+        String payload = userId.toString();
         //AccessToken 생성
         String accessToken = jwtTokenProvider.createToken(payload);
         //쿠키 생성
-        ResponseCookie cookie = ResponseCookie.from("AccessToken", accessToken)
+        ResponseCookie cookie = ResponseCookie.from("AccessToken", "Bearer=" + accessToken)
                 .maxAge(Duration.ofMillis(1800000))// 30분
                 .path("/")// 모든 경로에서 접근 가능
                 .build();
-        //HTTP response 헤더에 생성한 쿠키 포함
         response.addHeader("set-cookie", cookie.toString());
-        return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "AccessToken=" + accessToken), HttpStatus.OK);
+        return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "Login success!"), HttpStatus.OK);
     }
 
     @GetMapping("/test")

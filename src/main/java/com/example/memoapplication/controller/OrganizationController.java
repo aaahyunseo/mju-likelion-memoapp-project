@@ -39,7 +39,7 @@ public class OrganizationController {
     @DeleteMapping("/{id}")
     public ResponseEntity<ResponseDto<
             Void>> deleteOrganization(@AuthenticatedUser User user, @PathVariable UUID id) {
-        organizationService.deleteOrganization(user, id);
+        organizationService.deleteOrganization(id);
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "Withdrawal success"), HttpStatus.OK);
     }
 }
